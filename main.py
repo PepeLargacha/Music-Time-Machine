@@ -15,11 +15,10 @@ After that you can run the program again and it will work as planned.
 """
 from ui import get_year_from_user
 from spotify_api import MySpotify
-from billboardsouper import get_music_titles
+from billboardsouper import BillboardScraper
 
+my_scraper = BillboardScraper(get_year_from_user())
 my_spotify = MySpotify()
-year = get_year_from_user()
-songs_list = get_music_titles(year)
-uri_list = my_spotify.get_list_of_songs_uri(songs_list)
-playlist_id = my_spotify.create_playlist(year)
-my_spotify.populate_playlist(playlist_id, uri_list)
+my_spotify.get_list_of_songs_uri(my_scraper.song_list)
+my_spotify.create_playlist(my_scraper.target_date)
+my_spotify.populate_playlist()

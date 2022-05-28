@@ -1,4 +1,6 @@
 """Class for managing Spotify API."""
+from datetime import datetime
+from time import sleep
 import os
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
@@ -13,6 +15,8 @@ class MySpotify:
         self.client_secret = os.environ.get('SPOTIFY_CLIENT_SECRET')
         self.spotify = self.create_user()
         self.current_user = self.spotify.current_user()['id']
+        self.uri_list = []
+        self.playlist_id = None
 
     def create_user(self):
         spotify = spotipy.Spotify(
@@ -36,14 +40,18 @@ class MySpotify:
                 uri_list.append(uri['tracks']['items'][0]['uri'])
             except IndexError:
                 pass
-        return uri_list
+        self.uri_list = uri_list
 
-    def create_playlist(self, year) -> str:
+    def create_playlist(self, date: datetime) -> str:
+        week = date.strftime('%W')
+        year = date.year
+        playlist_name = f"Billboard Top 100 - Week {week} - {year}"
         playlist = self.spotify.user_playlist_create(
-            self.current_user, f'Billboard top 100 - {year}', public=False)
-        return playlist['id']
+            self.current_user, f'{playlist_name}', public=False)
+        self.playlist_id = playlist['id']
 
-    def populate_playlist(self, playlist_id: str, uri_list: list):
+    def populate_playlist(self):
+        sleep(5)
         self.spotify.user_playlist_add_tracks(
-            self.current_user, playlist_id, uri_list)
+            self.current_user, self.playlist_id, self.uri_list)
         print('Playlist created and populated!')
